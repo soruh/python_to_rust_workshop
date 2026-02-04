@@ -7,10 +7,6 @@ fn fibonacci(n: u32) -> Option<u128> {
     let mut b: u128 = 1;
 
     for _ in 0..n {
-        for i in 0..100 {
-            std::hint::black_box((i as f64).sqrt());
-        }
-
         let next = a.checked_add(b)?;
         a = b;
         b = next;
