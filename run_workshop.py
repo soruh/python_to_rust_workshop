@@ -1,3 +1,4 @@
+import argparse
 import math
 import subprocess
 import sys
@@ -166,18 +167,18 @@ def benchmark(
 def main(benchmark_duration=1.0):
     print(f"{Style.BRIGHT}{Fore.CYAN}=== Install Phase ===")
 
-    # 1. Install/Build both libraries
+    # Install/Build both libraries
     install_package(PYTHON_LIB_PATH, is_rust=False)
     install_package(RUST_LIB_PATH, is_rust=True)
 
-    # 2. Load User Config
+    # Load User Config
     try:
         config = load_workshop_config()
     except FileNotFoundError:
         print(f"{Fore.RED}Could not find 'workshop_config.py'.")
         sys.exit(1)
 
-    # 3. Import the installed libraries
+    # Import the installed libraries
     try:
         import python_lib
         import rust_lib
@@ -188,7 +189,7 @@ def main(benchmark_duration=1.0):
         )
         sys.exit(1)
 
-    # 4. Get the functions
+    # Get the functions
     py_func = python_lib.implementation
     rs_func = rust_lib.implementation
 
@@ -243,4 +244,17 @@ def main(benchmark_duration=1.0):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Python to Rust Workshop Benchmarker")
+
+    parser.add_argument(
+        "-b",
+        "--bench-duration",
+        type=float,
+        default=1.0,
+        help="Target duration for each benchmark in seconds (default: 1.0)",
+    )
+
+    args = parser.parse_args()
+
+    # Pass the parsed duration into main
+    main(benchmark_duration=args.bench_duration)
