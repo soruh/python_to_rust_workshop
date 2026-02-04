@@ -26,7 +26,7 @@ RUST_LIB_PATH = Path("./rust_lib")
 def install_package(path, is_rust=False):
     """Installs a package in editable mode (or via maturin for Rust)."""
 
-    print(f"Building and installing {path.name:<10} ...", end="", flush=True)
+    print(f"Building and installing {f'{path.name}...':<13}", end="", flush=True)
 
     if is_rust:
         cmd = [
@@ -61,25 +61,20 @@ def load_workshop_config():
 
 
 def benchmark(name, func, workload_func, target_total_duration=5.0):
-    # Use Cyan for the header of the specific benchmark
-    print(f"    {Style.DIM}Calibrating {name}...", end="", flush=True)
+    print(f"    {Style.DIM}Calibrating {f"{name}...":<32}", end="", flush=True)
 
-    # --- Stage 1: Calibration ---
-    # Determine how many iterations fit into ~0.1s
     start_cal = time.perf_counter()
     count = 0
     while time.perf_counter() - start_cal < 0.1:
         workload_func(func)
         count += 1
 
-    # Chunk size targets ~0.2s of work
     chunk_size = max(1, int(count * 2.0))
-
     print(f" {Fore.GREEN}DONE")
 
-    # --- Stage 2: High-Precision Measurement ---
+    print(f"{Style.DIM}    Running in chunks of ", end="")
     print(
-        f"    {Style.DIM}Running in chunks of {Style.RESET_ALL}{Fore.MAGENTA}{chunk_size:,} {Style.RESET_ALL}{Style.DIM}iterations...",
+        f"{Fore.MAGENTA}{f"{chunk_size:,}{Style.RESET_ALL}{Style.DIM} iterations...":<31}",
         end="",
         flush=True,
     )
@@ -89,7 +84,6 @@ def benchmark(name, func, workload_func, target_total_duration=5.0):
     wall_clock_start = time.perf_counter()
 
     while (time.perf_counter() - wall_clock_start) < target_total_duration:
-
         chunk_start = time.perf_counter()
         for _ in range(chunk_size):
             workload_func(func)
@@ -99,18 +93,19 @@ def benchmark(name, func, workload_func, target_total_duration=5.0):
         total_iterations += chunk_size
 
     avg_time = total_pure_time / total_iterations
-
-    # Calculate overhead for interest (Wall clock vs Pure execution)
     total_wall_time = time.perf_counter() - wall_clock_start
     overhead = ((total_wall_time - total_pure_time) / total_wall_time) * 100
 
-    print(
-        f" {Fore.GREEN}DONE{Style.RESET_ALL}{Style.DIM} (Completed {Style.RESET_ALL}{Fore.MAGENTA}{total_iterations:,} {Style.RESET_ALL}{Style.DIM}iterations)"
-    )
+    print(f" {Fore.GREEN}DONE")
 
     print(
-        f"    Result: {Style.BRIGHT}{avg_time:.8f} sec/iter {Style.NORMAL}{Style.DIM}(Overhead: {overhead:.1f}%)"
+        f"    {Style.DIM}└─ Completed {Style.RESET_ALL}{Fore.MAGENTA}{total_iterations:>10,}{Style.RESET_ALL} {Style.DIM}iterations"
     )
+    print(
+        f"    {Style.DIM}└─ Result: {Style.RESET_ALL}{Style.BRIGHT}{avg_time:.8f} sec/iter "
+        f"{Style.NORMAL}{Style.DIM}(Overhead: {overhead:>5.1f}%){Style.RESET_ALL}"
+    )
+
     return avg_time
 
 
@@ -156,9 +151,9 @@ def main():
     rs_res = config.do_work(rs_func)
 
     if config.compare_results(py_res, rs_res):
-        print(f"Results {Fore.GREEN}Match!")
+        print(f"Results {Fore.GREEN}MATCH")
     else:
-        print(f"Results {Fore.RED}Do Not Match!")
+        print(f"Results {Fore.RED}DO NOT MATCH")
         print(f"Python result: {py_res}")
         print(f"  Rust result: {rs_res}")
         sys.exit(1)
@@ -171,12 +166,12 @@ def main():
 
     if speedup > 1:
         print(
-            f"\nThe rust implementation is approximately {Fore.GREEN}{Style.BRIGHT}{speedup:.2f}x faster{Style.RESET_ALL} than Python!"
+            f"\nThe rust implementation ran {Fore.GREEN}{Style.BRIGHT}{speedup:.2f}x faster{Style.RESET_ALL} than Python!"
         )
     else:
         slowdown = 1 / speedup
         print(
-            f"\nThe rust implementation is approximately {Fore.RED}{Style.BRIGHT}{slowdown:.2f}x slower{Style.RESET_ALL} than Python!"
+            f"\nThe rust implementation ran {Fore.RED}{Style.BRIGHT}{slowdown:.2f}x slower{Style.RESET_ALL} than Python!"
         )
 
 
