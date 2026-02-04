@@ -11,7 +11,7 @@ RUST_LIB_PATH = Path("./rust_lib")
 
 def install_package(path, is_rust=False):
     """Installs a package in editable mode (or via maturin for Rust)."""
-    print(f"🔨 Building and Installing {path.name}...")
+    print(f"Building and Installing {path.name}...")
     if is_rust:
         # maturin develop builds and installs into the current venv
         cmd = [
@@ -27,9 +27,9 @@ def install_package(path, is_rust=False):
 
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        print(f"❌ Error installing {path.name}:\n{result.stderr}")
+        print(f"Error installing {path.name}:\n{result.stderr}")
         sys.exit(1)
-    print(f"✅ {path.name} installed.")
+    print(f"{path.name} installed.")
 
 
 def load_workshop_config():
@@ -43,7 +43,7 @@ def load_workshop_config():
 
 
 def benchmark(name, func, workload_func, target_total_duration=5.0):
-    print(f"   ⏱️  Calibrating {name}...")
+    print(f"      Calibrating {name}...")
 
     # --- Stage 1: Calibration ---
     # Determine how many iterations fit into ~0.1s
@@ -85,7 +85,7 @@ def benchmark(name, func, workload_func, target_total_duration=5.0):
 
 
 def main():
-    print("=== 🦀 Workshop Runner Starting 🐍 ===\n")
+    print("=== Workshop Runner Starting ===\n")
 
     # 1. Install/Build both libraries
     install_package(PYTHON_LIB_PATH, is_rust=False)
@@ -100,7 +100,7 @@ def main():
         import python_lib
         import rust_lib
     except ImportError as e:
-        print(f"❌ Could not import libraries: {e}")
+        print(f"Could not import libraries: {e}")
         print(
             "Ensure you are running in a virtual environment where 'maturin' is installed."
         )
@@ -110,12 +110,12 @@ def main():
     py_func = python_lib.implementation
     rs_func = rust_lib.implementation
 
-    print("\n=== 🧪 Verification Phase ===")
+    print("\n=== Verification Phase ===")
     py_res = config.do_work(py_func)
 
     if not config.compare_results(py_res, py_res):
         print(
-            "❌ The python result does not match itself! Check your `compare_results` implementation"
+            "The python result does not match itself! Check your `compare_results` implementation"
         )
         print(f"Python result: {py_res}")
         sys.exit(1)
@@ -123,19 +123,28 @@ def main():
     rs_res = config.do_work(rs_func)
 
     if config.compare_results(py_res, rs_res):
-        print("✅ Results Match! The Rust implementation is correct.")
+        print("Results Match! The Rust implementation is correct.")
     else:
-        print("❌ Results Do Not Match!")
+        print("Results Do Not Match!")
         print(f"Python result: {py_res}")
         print(f"  Rust result: {rs_res}")
         sys.exit(1)
 
-    print("\n=== ⏱️  Benchmark Phase ===")
+    print("\n=== Benchmark Phase ===")
     py_time = benchmark("Python", py_func, config.do_work)
     rs_time = benchmark("Rust", rs_func, config.do_work)
 
     speedup = py_time / rs_time
-    print(f"\n⚡ Rust is {speedup:.2f}x faster than Python!")
+
+    if speedup > 1:
+        print(
+            f"\nThe rust implementation is approximately {speedup:.2f}x faster than Python!"
+        )
+    else:
+        slowdown = 1 / speedup
+        print(
+            f"\nThe rust implementation is approximately {slowdown:.2f}x slower than Python!"
+        )
 
 
 if __name__ == "__main__":

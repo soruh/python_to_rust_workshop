@@ -7,8 +7,11 @@ fn fibonacci(n: u32) -> Option<u128> {
     let mut b: u128 = 1;
 
     for _ in 0..n {
-        let next = a.checked_add(b)?;
+        for i in 0..100 {
+            std::hint::black_box((i as f64).sqrt());
+        }
 
+        let next = a.checked_add(b)?;
         a = b;
         b = next;
     }
@@ -30,7 +33,7 @@ mod rust_lib {
     fn implementation(n: u32) -> PyResult<u128> {
         fibonacci(n).ok_or_else(|| {
             PyOverflowError::new_err(format!(
-                "Overflow when computing the {n}th fibonacci number"
+                "Overflow occured while computing the {n}th fibonacci number"
             ))
         })
     }

@@ -1,5 +1,5 @@
 venv/
 python_lib/python_lib.egg-info/
-python_lib/__pycache__
 rust_lib/target
+**/__pycache__
 *.pyc
