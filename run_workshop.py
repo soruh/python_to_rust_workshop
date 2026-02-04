@@ -43,7 +43,6 @@ def install_package(path, is_rust=False):
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    # 3. Print the result on the SAME line
     if result.returncode != 0:
         print(f" {Fore.RED}FAILED")
         print(f"{Fore.RED}Error details:\n{result.stderr}")
