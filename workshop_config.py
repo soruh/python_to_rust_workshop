@@ -12,3 +12,10 @@ def compare_results(result_a, result_b):
     Defines how to verify that the Rust version matches the Python version.
     """
     return result_a == result_b
+
+
+def print_result(result):
+    """
+    Defines how to print a result for debugging
+    """
+    return result
