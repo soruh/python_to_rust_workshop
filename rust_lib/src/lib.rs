@@ -7,9 +7,7 @@ fn fibonacci(n: u32) -> Option<u128> {
     let mut b: u128 = 1;
 
     for _ in 0..n {
-        let next = a.checked_add(b)?;
-        a = b;
-        b = next;
+        (a, b) = (b, a.checked_add(b)?);
     }
 
     Some(a)
